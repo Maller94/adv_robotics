@@ -4,7 +4,6 @@ import numpy as np
 import heapq
 import time
 
-
 def transferToGameState(layout):
     """Transfer the layout of initial puzzle"""
     layout = [x.replace('\n', '') for x in layout]
@@ -182,6 +181,8 @@ def states_converted_to_robot():
 
     return finalStates
 
-
 def run():
-    return states_converted_to_robot()
+    print(states_converted_to_robot())
+    with open('plan.txt','w') as w:
+        w.write(str(states_converted_to_robot()))
+run()
