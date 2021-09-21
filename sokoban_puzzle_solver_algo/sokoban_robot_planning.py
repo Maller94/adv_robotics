@@ -4,6 +4,7 @@ import numpy as np
 import heapq
 import time
 
+
 def transferToGameState(layout):
     """Transfer the layout of initial puzzle"""
     layout = [x.replace('\n', '') for x in layout]
@@ -88,7 +89,8 @@ def legalActions(posPlayer, posBox):
 def updateState(posPlayer, posBox, action):
     """Return updated game state after an action is taken"""
     xPlayer, yPlayer = posPlayer  # the previous position of player
-    newPosPlayer = [xPlayer + action[0], yPlayer + action[1]]  # the current position of player
+    newPosPlayer = [xPlayer + action[0], yPlayer +
+                    action[1]]  # the current position of player
     posBox = [list(x) for x in posBox]
     if action[-1].isupper():  # if pushing, update the position of box
         posBox.remove(newPosPlayer)
@@ -99,8 +101,8 @@ def updateState(posPlayer, posBox, action):
 
 
 def breadthFirstSearch():
-    beginBox = PosOfBoxes(gameState)
-    beginPlayer = PosOfPlayer(gameState)
+    beginBox = PosOfBoxes(integerMap)
+    beginPlayer = PosOfPlayer(integerMap)
 
     # e.g. ((2, 2), ((2, 3), (3, 4), (4, 4), (6, 1), (6, 4), (6, 5)))
     startState = (beginPlayer, beginBox)
@@ -112,7 +114,7 @@ def breadthFirstSearch():
         node = frontier.popleft()
         node_action = actions.popleft()
         if isEndState(node[-1][-1]):
-            print(','.join(node_action[1:]).replace(',', ''))
+            #print(','.join(node_action[1:]).replace(',', ''))
             moves.append(','.join(node_action[1:]).replace(',', ''))
             break
         if node[-1] not in exploredSet:
@@ -124,16 +126,62 @@ def breadthFirstSearch():
                 actions.append(node_action + [action[-1]])
     moves = "".join(moves)
     moves_list = [char for char in moves]
+    moves_list.append('done')
     return moves_list
 
 
 # global variables
 with open('mandatory_sokobanmaze.txt', "r") as f:
     layout = f.readlines()
-gameState = transferToGameState(layout)
-posWalls = PosOfWalls(gameState)
-posGoals = PosOfGoals(gameState)
+integerMap = transferToGameState(layout)
+posWalls = PosOfWalls(integerMap)
+posGoals = PosOfGoals(integerMap)
+
+def states_converted_to_robot():
+    states = breadthFirstSearch()
+    newStates = []
+    tempArr1 = []
+    tempArr2 = []
+    for index,elem in enumerate(states):
+        if elem.isupper() == True and tempArr1 == []:
+            tempArr1.append(elem)
+        elif elem.isupper() == True and elem in tempArr1:
+            tempArr1.append(elem)
+        elif elem.isupper() == True and elem not in tempArr1:
+            tempArr2.append(elem)
+
+        if elem.islower() == True:
+            if tempArr1 != []:
+                tempArr1.append(tempArr1[0])
+                newStates.append(tempArr1)
+                if tempArr1[0] == 'R':
+                    tempArr1.append('l')
+                elif tempArr1[0] == 'L':
+                    tempArr1.append('r')
+                elif tempArr1[0] == 'U':
+                    tempArr1.append('d')
+                elif tempArr1[0] == 'D':
+                    tempArr1.append('u')
+            if tempArr2 != []:
+                tempArr2.append(tempArr2[0])
+                newStates.append(tempArr2)
+                if tempArr2[0] == 'R':
+                    tempArr2.append('l')
+                elif tempArr2[0] == 'L':
+                    tempArr2.append('r')
+                elif tempArr2[0] == 'U':
+                    tempArr2.append('d')
+                elif tempArr2[0] == 'D':
+                    tempArr2.append('u')
+            newStates.append([elem])
+            tempArr1 = []
+            tempArr2 = []
+    finalStates = []
+    for el in newStates:
+        finalStates += el
+
+    return finalStates
 
 
 def run():
-    return breadthFirstSearch()
+    return states_converted_to_robot()
